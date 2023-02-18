@@ -62,25 +62,25 @@ public class UserClassController {
         );
     }
 
-//    @DeleteMapping("{userId}/deleteUserToClass/{classId}")
-//    public ResponseEntity<ResponseObject> deleteRate(@PathVariable (value = "userId") Long userId,
-//                                                     @PathVariable (value = "classId") Long classId){
-//        Optional<User> userOfClass = userRepository.findById(userId);
-//        Optional<Class> classOfUser = classRepository.findById(classId);
-//        if(userOfClass.isPresent() && classOfUser.isPresent()) {
-//            User user = userOfClass.get();
-//            Class cla = classOfUser.get();
-//            Optional<UserClassKey> exists = userClassRepository.findByUserAndCla(user, cla);
-//            if(exists.isPresent()){
-//                userClassRepository.deleteById(exists);
-//                return ResponseEntity.status(HttpStatus.OK).body(
-//                        new ResponseObject("ok", "Delete Rate successfully", "")
-//                );
-//            }
-//        }
-//
-//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-//                new ResponseObject("failed", "Can't find rate of user to delete", "")
-//        );
-//    }
+    @DeleteMapping("{userId}/deleteUserToClass/{classId}")
+    public ResponseEntity<ResponseObject> deleteRate(@PathVariable (value = "userId") Long userId,
+                                                     @PathVariable (value = "classId") Long classId){
+        Optional<User> userOfClass = userRepository.findById(userId);
+        Optional<Class> classOfUser = classRepository.findById(classId);
+        if(userOfClass.isPresent() && classOfUser.isPresent()) {
+            User user = userOfClass.get();
+            Class cla = classOfUser.get();
+            Optional<UserClass> exists = userClassRepository.findByUserAndCla(user, cla);
+            if(exists.isPresent()){
+                userClassRepository.delete(exists.get());
+                return ResponseEntity.status(HttpStatus.OK).body(
+                        new ResponseObject("ok", "Delete ClassOfUser successfully", "")
+                );
+            }
+        }
+
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("failed", "Can't find ClassOfUser of user to delete", "")
+        );
+    }
 }
