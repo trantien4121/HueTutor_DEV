@@ -67,8 +67,8 @@ public class UserController {
                                               @RequestParam("file")MultipartFile file) {  //@Request body chính là kiểu dữ liệu truyền vào dạng body)
         //2 user must not be have a same email
 
-        List<User> foundUser = repository.findByEmail(email.trim());
-        if (foundUser.size() > 0) {
+        Optional<User> foundUser = repository.findByEmail(email.trim());    //cũ là List<User>
+        if (foundUser.isPresent()) {    //cũ là foundUser.size()!=0
             return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
                     new ResponseObject("failed", "Email of User already exists", "")
             );
