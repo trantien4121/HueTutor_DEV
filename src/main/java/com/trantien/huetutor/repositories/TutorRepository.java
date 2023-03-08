@@ -12,4 +12,5 @@ import java.util.Optional;
 public interface TutorRepository extends JpaRepository<Tutor, Long> {
     List<Tutor> findByAcademicLevel(String academicLevel);
     Optional<Tutor> findByTutorIdAndUser(Long tutorId, User user);
+    Optional<Tutor> findByUser(User user);
 }

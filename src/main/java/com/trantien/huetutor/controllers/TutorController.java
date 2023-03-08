@@ -44,6 +44,26 @@ public class TutorController {
                 );
     }
 
+    @GetMapping("/getRole/{userId}")    //Mới thêm
+    ResponseEntity<ResponseObject> findTutorByUserId(@PathVariable Long userId){
+
+        Optional<User> user = userRepository.findById(userId);
+        if(user.isPresent()){
+            Optional<Tutor> foundTutor = tutorRepository.findByUser(user.get());
+            return foundTutor.isPresent() ?
+                    ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("ok", "Query tutor successfully", foundTutor)
+                    ) :
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new ResponseObject("failed", "Can't find tutor with userId = " + userId, "")
+                    );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_IMPLEMENTED).body(
+                new ResponseObject("failed", "Can't find tutor with userId = " + userId, "")
+        );
+    }
+
+
     @PostMapping("/{userId}/insert")
     public ResponseEntity<ResponseObject> insertTutor(@PathVariable (value = "userId") Long userId,
                                                               @ModelAttribute Tutor tutor){
