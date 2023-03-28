@@ -123,7 +123,7 @@ public class User {
         return age;
     }
 
-    public void setAge(Long Age) {
+    public void setAge(Long age) {
         this.age = age;
     }
 

@@ -3,13 +3,20 @@ package com.trantien.huetutor.controllers;
 import com.trantien.huetutor.models.*;
 import com.trantien.huetutor.models.Class;
 import com.trantien.huetutor.repositories.ClassRepository;
+import com.trantien.huetutor.repositories.PagingClassRepository;
 import com.trantien.huetutor.repositories.TutorRepository;
+import com.trantien.huetutor.services.PagingClassService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -21,6 +28,7 @@ public class ClassController {
 
     @Autowired
     ClassRepository classRepository;
+
 
     @GetMapping("")
     List<Class> getAllClasses(){
@@ -37,6 +45,64 @@ public class ClassController {
                 ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                         new ResponseObject("failed", "Can't find Class with id = " + classId, "")
                 );
+    }
+
+    @CrossOrigin
+    @GetMapping("/getAllClassesOfTutor/{tutorId}")
+    ResponseEntity<ResponseObject> getAllClassesOfTutors(@PathVariable Long tutorId){
+
+        Optional<Tutor> foundTutor = tutorRepository.findById(tutorId);
+
+        if(foundTutor.isPresent()){
+            List<Class> listClassFound = classRepository.findByTutor(foundTutor.get());
+            return listClassFound.size()!=0 ?
+                    ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("ok", "Query class successfully", listClassFound)
+                    ) :
+                    ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new ResponseObject("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", "")
+                    );
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", "")
+        );
+    }
+
+    @CrossOrigin
+    @GetMapping("/PaginationAndFilter/getClassesOfTutor/{tutorId}")
+    ResponseEntity<ResponseObject> getPNFClassesOfTutor(
+            @PathVariable Long tutorId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "6") int pageSize,
+            @RequestParam(defaultValue = "classId") String sortBy){
+
+        try{
+            List<Class> classesOfTutor = new ArrayList<Class>();
+            Pageable pagingSort = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+            Page<Class> pageTuts = null;
+
+            Optional<Tutor> foundTutor = tutorRepository.findById(tutorId);
+            if(foundTutor.isPresent()){
+                if (status == null)
+                    pageTuts = classRepository.findByTutor(foundTutor.get(), pagingSort);
+                else
+                    pageTuts = classRepository.findByTutorAndStatus(foundTutor.get(), status, pagingSort);
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", "")
+                );
+            }
+            classesOfTutor = pageTuts.getContent();
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("NumOfPages = " + String.valueOf(pageTuts.getTotalPages()), "Query class successfully", classesOfTutor)
+            );
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", "")
+            );
+        }
     }
 
     @PostMapping("/{tutorId}/insert")

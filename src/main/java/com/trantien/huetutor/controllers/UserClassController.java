@@ -7,12 +7,17 @@ import com.trantien.huetutor.repositories.UserClassRepository;
 import com.trantien.huetutor.repositories.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cglib.core.Local;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,6 +38,7 @@ public class UserClassController {
         return userClassRepository.findAll();
     }
 
+    @CrossOrigin
     @GetMapping("/{userId}")
     List<UserClass> getAllClassesOfUserById(@PathVariable Long userId) {
         Optional<User> foundUser = userRepository.findById(userId);
@@ -40,6 +46,39 @@ public class UserClassController {
             List<UserClass> user_Class = userClassRepository.findByUser(foundUser.get());
             return user_Class;
         } else return null;
+    }
+
+    @CrossOrigin
+    @GetMapping("/PaginationAndFilter/getAllClassesOfUser/{userId}")
+    ResponseEntity<ResponseObject> getPNFClassesOfUser(
+            @PathVariable Long userId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "6") int pageSize)
+    {
+        try{
+            List<UserClass> classesOfUser = new ArrayList<UserClass>();
+            Pageable pagingSort = PageRequest.of(pageNo, pageSize);
+            Page<UserClass> pageTuts = null;
+
+            Optional<User> foundUser  = userRepository.findById(userId);
+            if(foundUser.isPresent()){
+                pageTuts = userClassRepository.findByUser(foundUser.get(), pagingSort);
+            }
+            else{
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                        new ResponseObject("failed", "Can't find Class Of user with userId = " + "userId", "")
+                );
+            }
+            classesOfUser = pageTuts.getContent();
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new ResponseObject("NumOfPages = " + String.valueOf(pageTuts.getTotalPages()), "Query class successfully", classesOfUser)
+            );
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new ResponseObject("failed", "Can't find Class Of user with userId = " + "userId", "")
+            );
+        }
     }
 
     @PostMapping("{userId}/insertUserToClass/{classId}")

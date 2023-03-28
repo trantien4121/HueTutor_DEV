@@ -4,6 +4,8 @@ import com.trantien.huetutor.models.Class;
 import com.trantien.huetutor.models.User;
 import com.trantien.huetutor.models.UserClass;
 import com.trantien.huetutor.models.UserClassKey;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -18,5 +20,6 @@ public interface UserClassRepository extends JpaRepository<UserClass, UserClassK
     List<UserClass> findByUser(User user);
     List<UserClass> findByCla(Class cla);
     Optional<UserClass> findByUserAndCla(User user, Class cla);
+    Page<UserClass> findByUser(User user, Pageable pageable);
 
 }

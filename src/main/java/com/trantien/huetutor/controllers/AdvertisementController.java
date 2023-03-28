@@ -2,17 +2,22 @@ package com.trantien.huetutor.controllers;
 
 import com.trantien.huetutor.models.Advertisement;
 import com.trantien.huetutor.models.ResponseObject;
+import com.trantien.huetutor.models.Tutor;
 import com.trantien.huetutor.models.User;
 import com.trantien.huetutor.repositories.AdvertisementRepository;
+import com.trantien.huetutor.repositories.PagingAdvertisementRepository;
 import com.trantien.huetutor.repositories.UserRepository;
 import com.trantien.huetutor.services.IStorageService;
+import com.trantien.huetutor.services.PagingAdvertisementService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,9 +33,23 @@ public class AdvertisementController {
     @Autowired
     private IStorageService storageService;
 
+    @Autowired
+    private PagingAdvertisementService pagingAdvertisementService;
+
     @GetMapping("")
     List<Advertisement> getAllAdvertisement(){
         return advRepository.findAll();
+    }
+    @CrossOrigin
+    @GetMapping("/getAdvertisementPaging")
+    public ResponseEntity<List<Advertisement>> getAllTutorOfPaging(
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "10") int pageSize,
+            @RequestParam(defaultValue = "advertisementId") String sortBy)
+    {
+        List<Advertisement> list = pagingAdvertisementService.getAllAds(pageNo, pageSize, sortBy);
+
+        return new ResponseEntity<List<Advertisement>>(list, new HttpHeaders(), HttpStatus.OK);
     }
 
     @GetMapping("/{advertisementId}")
@@ -85,6 +104,9 @@ public class AdvertisementController {
         byte[] imageData = generatedFileName.getBytes();
         advertisement.setImage(imageData);
 
+        LocalDate lt = LocalDate.now();
+        advertisement.setPostedDay(lt);
+
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("ok", "Insert user successfully", advRepository.save(advertisement))   //save là thêm
         );
@@ -97,6 +119,7 @@ public class AdvertisementController {
                 .map(advertisement -> {
                     advertisement.setTitle(newAdv.getTitle());
                     advertisement.setContent(newAdv.getContent());
+                    advertisement.setPostedDay(newAdv.getPostedDay()    );
 
                     String generatedFileName = "";
                     if (file.isEmpty()){

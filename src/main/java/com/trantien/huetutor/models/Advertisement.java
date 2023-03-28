@@ -2,6 +2,8 @@ package com.trantien.huetutor.models;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
+
 @Entity
 @Table(name="tblAdvertisement")
 public class Advertisement {
@@ -24,6 +26,10 @@ public class Advertisement {
     @Lob
     @Column(name="image")
     private byte[] image;
+
+    @Column(name="postedDay")
+    private LocalDate postedDay;
+
 
     public Advertisement(){}
 
@@ -76,5 +82,12 @@ public class Advertisement {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+    public LocalDate getPostedDay() {
+        return postedDay;
+    }
+
+    public void setPostedDay(LocalDate postedDay) {
+        this.postedDay = postedDay;
     }
 }

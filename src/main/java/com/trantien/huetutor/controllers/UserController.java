@@ -86,6 +86,7 @@ public class UserController {
     }
 
     //update, upsert = update if found, otherwise insert
+    @CrossOrigin
     @PutMapping("/{userId}")
     ResponseEntity<ResponseObject> updateUser(@ModelAttribute User newUser, @PathVariable Long userId,  @RequestParam("file")MultipartFile file) {
         User updatedUser = repository.findById(userId)
@@ -99,15 +100,24 @@ public class UserController {
                     user.setPassword(newUser.getPassword());
                     user.setAdmin(newUser.isAdmin());
 
-                    String generatedFileName = "";
-                    if (file.isEmpty()){
-                        generatedFileName = "";
-                    }
-                    else generatedFileName = storageService.storeFile(file);
-                    byte[] imageData = generatedFileName.getBytes();
-                    user.setImage(imageData);
+//                    String generatedFileName = "";
+//                    if (file.isEmpty()){
+//                        generatedFileName = "";
+//                    }
+//                    else generatedFileName = storageService.storeFile(file);
+//                    byte[] imageData = generatedFileName.getBytes();
+//                    user.setImage(imageData);
 
-                    return repository.save(user);
+                    if(file.isEmpty()){
+                        return repository.save(user);
+                    }else{
+                        String generatedFileName = storageService.storeFile(file);
+                        byte[] imageData = generatedFileName.getBytes();
+                        user.setImage(imageData);
+                        return repository.save(user);
+                    }
+
+//                    return repository.save(user);
                 }).orElseGet(() ->{
                     newUser.setUserId(userId);
                     return repository.save(newUser);
