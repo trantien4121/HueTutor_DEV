@@ -10,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.Timer;
@@ -59,6 +60,8 @@ public class RateController {
         if(userRate.isPresent() && tutorOfRate.isPresent()) {
             rate.setUser(userRate.get());
             rate.setTutor(tutorOfRate.get());
+            LocalDate postedDay = LocalDate.now();
+            rate.setPostedDay(postedDay);
         }
 
         return ResponseEntity.status(HttpStatus.OK).body(
@@ -69,15 +72,15 @@ public class RateController {
     @PutMapping("{userId}/updateRate/{rateId}")
     public ResponseEntity<ResponseObject> updateRate(@PathVariable (value = "userId") Long userId,
                                                      @PathVariable (value = "rateId") Long rateId,
-                                                     @ModelAttribute Rate newRate){
+                                                     @ModelAttribute Rate newRate) {
         Rate updatedRate = rateRepository.findById(rateId)
                 .map(rate -> {
                     rate.setRateContent(newRate.getRateContent());
                     rate.setNumStarOfRate((newRate.getNumStarOfRate()));
                     return rateRepository.save(rate);
-                }).orElseGet(() ->{
+                }).orElseGet(() -> {
                     newRate.setRateId(rateId);
-                    return  rateRepository.save(newRate);
+                    return rateRepository.save(newRate);
                 });
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("ok", "Update rate successfully", updatedRate)   //save là thêm

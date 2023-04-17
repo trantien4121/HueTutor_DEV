@@ -99,6 +99,32 @@ public class TutorController {
     }
 
     @CrossOrigin
+    @PutMapping("/increaseLikeNumber/{tutorId}")
+    ResponseEntity<ResponseObject> increaseLikeNumber(@PathVariable long tutorId) throws Exception {
+        Tutor updatedTutor = tutorRepository.findById(tutorId)
+                .map(tutor -> {
+                    tutor.setLikeNumber(tutor.getLikeNumber() + 1);
+                    return tutorRepository.save(tutor);
+                }).orElseThrow(() -> new Exception("Tutor Info Not Found with tutorId = " + tutorId));
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("ok", "Increase likeNumber Of Tutor successfully", updatedTutor)   //save là thêm
+        );
+    }
+
+    @CrossOrigin
+    @PutMapping("/decreaseLikeNumber/{tutorId}")
+    ResponseEntity<ResponseObject> decreaseLikeNumber(@PathVariable long tutorId) throws Exception {
+        Tutor updatedTutor = tutorRepository.findById(tutorId)
+                .map(tutor -> {
+                    tutor.setLikeNumber(tutor.getLikeNumber() - 1);
+                    return tutorRepository.save(tutor);
+                }).orElseThrow(() -> new Exception("Tutor Info Not Found with tutorId = " + tutorId));
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("ok", "Decrease likeNumber Of Tutor successfully", updatedTutor)   //save là thêm
+        );
+    }
+
+    @CrossOrigin
     @PutMapping("/{userId}/{tutorId}")
     ResponseEntity<ResponseObject> updateTutor(@ModelAttribute Tutor newTutor, @PathVariable Long userId,
                                                @PathVariable Long tutorId) {

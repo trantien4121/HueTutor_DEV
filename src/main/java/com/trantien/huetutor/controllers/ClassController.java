@@ -118,6 +118,7 @@ public class ClassController {
         );
     }
 
+    @CrossOrigin
     @PutMapping("/{tutorId}/{classId}")
     ResponseEntity<ResponseObject> updateClass(@ModelAttribute Class newClass, @PathVariable Long tutorId,
                                                @PathVariable Long classId){
@@ -149,6 +150,7 @@ public class ClassController {
         );
     }
 
+    @CrossOrigin
     @DeleteMapping("/{tutorId}/{classId}")
     ResponseEntity<ResponseObject> deleteTutor(@PathVariable Long tutorId, @PathVariable Long classId){
 

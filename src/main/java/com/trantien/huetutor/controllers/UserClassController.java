@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +47,17 @@ public class UserClassController {
             List<UserClass> user_Class = userClassRepository.findByUser(foundUser.get());
             return user_Class;
         } else return null;
+    }
+
+    @CrossOrigin
+    @GetMapping("/getAllUsers/{classId}")
+    List<UserClass> getAllUsersOfClassByClassId(@PathVariable Long classId){
+        Optional<Class> foundClass = classRepository.findById(classId);
+        if(foundClass.isPresent()){
+            List<UserClass> userClass = userClassRepository.findByCla(foundClass.get());
+            return userClass;
+        }
+        else return null;
     }
 
     @CrossOrigin

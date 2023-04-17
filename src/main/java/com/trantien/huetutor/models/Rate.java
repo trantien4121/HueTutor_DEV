@@ -2,6 +2,7 @@ package com.trantien.huetutor.models;
 
 import jakarta.persistence.*;
 
+import java.time.LocalDate;
 import java.util.Set;
 
 @Entity
@@ -23,6 +24,9 @@ public class Rate {
     private String rateContent;
     @Column(name="numStarOfRate")
     private Long numStarOfRate;
+
+    @Column(name = "postedDay")
+    private LocalDate postedDay;
 
     @ManyToOne
     @JoinColumn(name = "userId")
@@ -72,5 +76,13 @@ public class Rate {
 
     public void setTutor(Tutor tutor) {
         this.tutor = tutor;
+    }
+
+    public LocalDate getPostedDay() {
+        return postedDay;
+    }
+
+    public void setPostedDay(LocalDate postedDay) {
+        this.postedDay = postedDay;
     }
 }
