@@ -141,4 +141,12 @@ public class UserController {
                 new ResponseObject("failed", "Can't find user to delete", "")
         );
     }
+
+    @GetMapping("/search")
+    public ResponseEntity<ResponseObject> search(@RequestParam(value = "keyword") String keyword){
+        List<User> searchedUser = repository.findByKeyword(keyword);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Query successfully!", searchedUser)
+        );
+    }
 }

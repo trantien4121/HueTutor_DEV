@@ -68,6 +68,24 @@ public class RateController {
                 new ResponseObject("ok", "Insert Rate successfully", rateRepository.save(rate))   //save là thêm
         );
     }
+    @CrossOrigin
+    @PostMapping("{userId}/insertRateJson/{tutorId}")
+    public ResponseEntity<ResponseObject> insertRateJson(@PathVariable (value = "userId") Long userId,
+                                                     @PathVariable (value = "tutorId") Long tutorId,
+                                                     @RequestBody Rate rate){
+        Optional<User> userRate = userRepository.findById(userId);
+        Optional<Tutor> tutorOfRate = tutorRepository.findById(tutorId);
+        if(userRate.isPresent() && tutorOfRate.isPresent()) {
+            rate.setUser(userRate.get());
+            rate.setTutor(tutorOfRate.get());
+            LocalDate postedDay = LocalDate.now();
+            rate.setPostedDay(postedDay);
+        }
+
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("ok", "Insert Rate successfully", rateRepository.save(rate))   //save là thêm
+        );
+    }
 
     @PutMapping("{userId}/updateRate/{rateId}")
     public ResponseEntity<ResponseObject> updateRate(@PathVariable (value = "userId") Long userId,
