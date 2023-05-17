@@ -93,6 +93,7 @@ public class UserClassController {
         }
     }
 
+    @CrossOrigin
     @PostMapping("{userId}/insertUserToClass/{classId}")
     ResponseEntity<ResponseObject> insertUserToClassTeach(@PathVariable(value = "userId") Long userId,
                                                           @PathVariable(value = "classId") Long classId,
@@ -113,6 +114,7 @@ public class UserClassController {
         );
     }
 
+    @CrossOrigin
     @DeleteMapping("{userId}/deleteUserToClass/{classId}")
     public ResponseEntity<ResponseObject> deleteRate(@PathVariable (value = "userId") Long userId,
                                                      @PathVariable (value = "classId") Long classId){
@@ -132,6 +134,13 @@ public class UserClassController {
 
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                 new ResponseObject("failed", "Can't find ClassOfUser of user to delete", "")
+        );
+    }
+    @GetMapping("/count")
+    public ResponseEntity<ResponseObject> countByClassId(@RequestParam(value = "keyword") String keyword){
+        Long numOfStudents = (userClassRepository.countById(keyword) == null) ? 0: userClassRepository.countById(keyword);
+        return ResponseEntity.status(HttpStatus.OK).body(
+                new ResponseObject("OK", "Query successfully!", numOfStudents)
         );
     }
 }

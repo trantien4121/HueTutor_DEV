@@ -22,4 +22,7 @@ public interface UserClassRepository extends JpaRepository<UserClass, UserClassK
     Optional<UserClass> findByUserAndCla(User user, Class cla);
     Page<UserClass> findByUser(User user, Pageable pageable);
 
+    @Query(value = "select count(*) as NumOfStudents from tblUser_Class where classId = :keyword group by :keyword", nativeQuery = true)
+    Long countById(String keyword);
+
 }
