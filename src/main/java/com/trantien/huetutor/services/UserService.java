@@ -24,8 +24,18 @@ public class UserService implements UserDetailsService {
             throw new UsernameNotFoundException(username);
         }
         BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-        String password = passwordEncoder.encode(user.get().getPassword());
-        user.get().setPassword(password);
+//        String password = passwordEncoder.encode(user.get().getPassword());
+        String password = user.get().getPassword();
+        String passwordEnc = passwordEncoder.encode(user.get().getPassword());
+
+        //Vì password có 2 dạng: được mã hóa và chưa mã hóa (do bước đầu chưa xử lý)
+        if (password.substring(0, 1).equals("$")){
+            user.get().setPassword(password);
+        } else{
+            user.get().setPassword(passwordEnc);
+        }
+
+//        user.get().setPassword(password);
         return new CustomUserDetails(user.get());
     }
 

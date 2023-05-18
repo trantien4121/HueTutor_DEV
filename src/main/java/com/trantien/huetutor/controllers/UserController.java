@@ -1,9 +1,11 @@
 package com.trantien.huetutor.controllers;
 
+import com.trantien.huetutor.jwt.JwtTokenProvider;
 import com.trantien.huetutor.models.Class;
 import com.trantien.huetutor.models.ResponseObject;
 import com.trantien.huetutor.models.Tutor;
 import com.trantien.huetutor.models.User;
+import com.trantien.huetutor.payloads.ChangePasswordRequest;
 import com.trantien.huetutor.payloads.PagingResponse;
 import com.trantien.huetutor.repositories.UserRepository;
 import com.trantien.huetutor.services.IStorageService;
@@ -15,6 +17,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -26,6 +29,10 @@ import java.util.Optional;
 @RestController     //Báo cho spring biết class này là controller
 @RequestMapping(path = "/api/v1/Users")
 public class UserController {
+    @Autowired
+    JwtTokenProvider tokenProvider;
+    @Autowired
+    PasswordEncoder passwordEncoder;
     @Autowired
     private UserRepository repository;
     @Autowired
@@ -89,7 +96,48 @@ public class UserController {
         byte[] imageData = generatedFileName.getBytes();
         return ResponseEntity.status(HttpStatus.OK).body(
                 new ResponseObject("ok", "Insert user successfully", repository.save(new User(email,
-                        fullName, gender, address, age, phoneNumber, password, isAdmin, imageData)))   //save là thêm
+                        fullName, gender, address, age, phoneNumber, passwordEncoder.encode(password), isAdmin, imageData)))   //save là thêm
+        );
+    }
+
+    @CrossOrigin
+    @PutMapping("/changePassword/{accessToken}")
+    ResponseEntity<ResponseObject> changePassword(@PathVariable String accessToken,
+                                                  @RequestBody ChangePasswordRequest changePasswordRequest){
+        Long userId  = tokenProvider.getUserIdFromJWT(accessToken);
+        Optional<User> foundUser = repository.findById(userId);
+        if(foundUser.isPresent()){
+            String oldPasswordOfFoundUser = foundUser.get().getPassword();
+            if(oldPasswordOfFoundUser.substring(0,1).equals("$")){
+                if(passwordEncoder.matches(changePasswordRequest.getOldPassword(), oldPasswordOfFoundUser) == true)
+                {
+                    foundUser.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+                    repository.save(foundUser.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("ok", "change password successfully", passwordEncoder.encode(changePasswordRequest.getNewPassword()))
+                    );
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                            new ResponseObject("failed", "Old Password incorrect!", "")
+                    );
+                }
+            }else{
+                if(changePasswordRequest.getOldPassword().equals(oldPasswordOfFoundUser)){
+                    foundUser.get().setPassword(passwordEncoder.encode(changePasswordRequest.getNewPassword()));
+                    repository.save(foundUser.get());
+                    return ResponseEntity.status(HttpStatus.OK).body(
+                            new ResponseObject("ok", "change password successfully", passwordEncoder.encode(changePasswordRequest.getNewPassword()))
+                    );
+                }else{
+                    return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(
+                            new ResponseObject("failed", "Old Password incorrect!", "")
+                    );
+                }
+            }
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                new ResponseObject("failed", "Can't find user to change password", "")
         );
     }
 
@@ -105,7 +153,7 @@ public class UserController {
                     user.setAddress(newUser.getAddress());
                     user.setAge(newUser.getAge());
                     user.setPhoneNumber(newUser.getPhoneNumber());
-                    user.setPassword(newUser.getPassword());
+//                    user.setPassword(newUser.getPassword());
                     user.setAdmin(newUser.isAdmin());
 
 //                    String generatedFileName = "";
