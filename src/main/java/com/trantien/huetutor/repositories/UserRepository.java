@@ -15,6 +15,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
     //List<User> findByEmail(String email);
     Optional<User> findByEmail(String email);
 
+    Optional<User> findByResetToken(String resetToken);
+
     //Custom query
     @Query(value = "select s.* from tblUser s join tblTutor u on u.userId = s.userId where s.fullName like %:keyword%", nativeQuery = true)
     List<User> findByKeyword(String keyword);

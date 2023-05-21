@@ -42,7 +42,8 @@ public class User {
     @Column(name="isAdmin")
     private boolean isAdmin;
 
-
+    @Column(name = "reset_token")
+    private String resetToken;
     @Lob
     private byte[] image;
 
@@ -157,6 +158,14 @@ public class User {
 
     public void setImage(byte[] image) {
         this.image = image;
+    }
+
+    public String getResetToken() {
+        return resetToken;
+    }
+
+    public void setResetToken(String resetToken) {
+        this.resetToken = resetToken;
     }
 
     @Override
