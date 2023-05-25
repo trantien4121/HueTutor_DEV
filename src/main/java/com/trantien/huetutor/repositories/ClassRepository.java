@@ -16,6 +16,8 @@ public interface ClassRepository extends JpaRepository<Class, Long> {
     List<Class> findByTutor(Tutor tutor);
 
     Page<Class> findByTutor(Tutor tutor, Pageable pageable);
+    Page<Class> findByStatus(String status, Pageable pageable);
+
 
     Page<Class> findByTutorAndStatus(Tutor tutor, String status, Pageable pageable);
 }

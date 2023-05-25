@@ -2,9 +2,11 @@ package com.trantien.huetutor.controllers;
 
 import com.trantien.huetutor.models.*;
 import com.trantien.huetutor.models.Class;
+import com.trantien.huetutor.payloads.PagingResponse;
 import com.trantien.huetutor.repositories.ClassRepository;
 import com.trantien.huetutor.repositories.PagingClassRepository;
 import com.trantien.huetutor.repositories.TutorRepository;
+import com.trantien.huetutor.repositories.UserRepository;
 import com.trantien.huetutor.services.PagingClassService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -101,6 +103,68 @@ public class ClassController {
         }catch(Exception e){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
                     new ResponseObject("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", "")
+            );
+        }
+    }
+
+    @CrossOrigin
+    @GetMapping("/PaginationAndFilter/getClasses")
+    ResponseEntity<PagingResponse> getPNFClasses(
+            @RequestParam(required = false) Long tutorId,
+            @RequestParam(required = false) String status,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "8") int pageSize,
+            @RequestParam(defaultValue = "classId") String sortBy){
+
+        try{
+            List<Class> classesOfTutor = new ArrayList<Class>();
+            Pageable pagingSort = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
+            Page<Class> pageTuts = null;
+
+            if(status==null){
+                status = "";
+            }
+            if(tutorId==null){
+                tutorId = 0L;
+            }
+
+            if(tutorId==0L && status.equals("")){
+                pageTuts = (Page<Class>) classRepository.findAll(pagingSort);
+            }
+            else if(tutorId!=0L && status.equals("")){
+                Optional<Tutor> foundTutor = tutorRepository.findById(tutorId);
+                if(foundTutor.isPresent()){
+                    pageTuts = classRepository.findByTutor(foundTutor.get(), pagingSort);
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new PagingResponse("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", 0L, 0L, "")
+                    );
+                }
+            }
+            else if(!status.equals("") && tutorId==0L){
+                pageTuts = classRepository.findByStatus(status, pagingSort);
+            }
+            else {
+                Optional<Tutor> foundTutor = tutorRepository.findById(tutorId);
+                if(foundTutor.isPresent()){
+                    pageTuts = classRepository.findByTutorAndStatus(foundTutor.get(), status, pagingSort);
+                }
+                else{
+                    return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                            new PagingResponse("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", 0L, 0L, "")
+                    );
+                }
+            }
+
+            classesOfTutor = pageTuts.getContent();
+            Long numOfPages = Long.parseLong(String.valueOf(pageTuts.getTotalPages()));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new PagingResponse("OK", "Query class successfully", numOfPages, (long) pageNo, classesOfTutor)
+            );
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new PagingResponse("failed", "Can't find Class Of tutor with tutorId = " + "tutorId", 0L, 0L, "")
             );
         }
     }

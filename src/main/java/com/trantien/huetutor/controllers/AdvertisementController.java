@@ -148,25 +148,25 @@ public class AdvertisementController {
                 new ResponseObject("ok", "Update user successfully", updatedAdv)   //save là thêm
         );
     }
+    @CrossOrigin
+    @DeleteMapping("/{advertisementId}")
+    ResponseEntity<ResponseObject> deleteAdvertisement( @PathVariable Long advertisementId){
 
-    @DeleteMapping("/{userId}/{advertisementId}")
-    ResponseEntity<ResponseObject> deleteUser(@PathVariable Long userId, @PathVariable Long advertisementId){
-
-        Optional<User> userPostAdv = userRepository.findById(userId);
-        if(userPostAdv.isPresent()) {
-            User user = userPostAdv.get();
-            Optional<Advertisement> exists = advRepository.findByAdvertisementIdAndUser(advertisementId, user);
-            if(exists.isPresent()){
+//        Optional<User> userPostAdv = userRepository.findById(userId);
+//        if(userPostAdv.isPresent()) {
+//            User user = userPostAdv.get();
+//            Optional<Advertisement> exists = advRepository.findByAdvertisementIdAndUser(advertisementId, user);
+//            if(exists.isPresent()){
                 advRepository.deleteById(advertisementId);
                 return ResponseEntity.status(HttpStatus.OK).body(
                         new ResponseObject("ok", "Delete advertisement successfully", "")
                 );
-            }
-        }
-
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
-                new ResponseObject("failed", "Can't find advertisement of user to delete", "")
-        );
+//            }
+//        }
+//
+//        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+//                new ResponseObject("failed", "Can't find advertisement of user to delete", "")
+//        );
     }
     @GetMapping("/searchByValue")
     public ResponseEntity<PagingResponse> searchByValue(

@@ -232,5 +232,32 @@ public class UserController {
             );
         }
     }
+    @CrossOrigin
+    @GetMapping("/searchByValueOnlyUser")
+    public ResponseEntity<PagingResponse> searchByValueOnlyUser(
+            @RequestParam(value = "searchValue") String searchValue,
+            @RequestParam(defaultValue = "0") int pageNo,
+            @RequestParam(defaultValue = "8") int pageSize
+    ){
+        try{
+            List<User> lstUsers = new ArrayList<User>();
+            Pageable pagingSort = PageRequest.of(pageNo, pageSize);
+            Page<User> pageTuts = null;
+            Long numOfPages = 0L;
+
+            pageTuts = repository.findByFullNameContainingIgnoreCase(searchValue, pagingSort);
+
+            lstUsers = pageTuts.getContent();
+            numOfPages = Long.parseLong(String.valueOf(pageTuts.getTotalPages()));
+            return ResponseEntity.status(HttpStatus.OK).body(
+                    new PagingResponse("OK", "Query User successfully", numOfPages, (long) pageNo, lstUsers)
+            );
+
+        }catch(Exception e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(
+                    new PagingResponse("Failed", "Can't find User with searchValue = " + searchValue, 0L, (long) pageNo, "")
+            );
+        }
+    }
 
 }
